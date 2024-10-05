@@ -20,6 +20,8 @@ class ActivityController extends Controller
         ->withCount('activities')
         ->whereNotNull('rank');
 
+        /*----Get data based on sort by filter----*/
+
         if (!empty($request->sort_by)) {
             switch ($request->sort_by) {
                 case 'Day':
@@ -40,10 +42,14 @@ class ActivityController extends Controller
                 default:
                     break;
             }
+            
+            /*----Get data based on sort by & search filter----*/
             if (!empty($request->user_id)) {
                 $query = $query->where(['id' => $request->user_id]);
             }
         }
+
+        /*----Get data based on search filter----*/
 
         if (!empty($request->user_id)) {
             $query->orderByRaw("CASE WHEN id = ? THEN 0 ELSE 1 END", [$request->user_id]);
@@ -61,8 +67,10 @@ class ActivityController extends Controller
             'is_calculated' => 1
         ]);
 
+        /*----Get data based on activity count----*/
         $users = User::withCount('activities')->orderBy('activities_count', 'desc')->get();
 
+        /*----Set Rank----*/
         $rank = 1;
         $previousCount = null;
 
